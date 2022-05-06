@@ -1,13 +1,14 @@
 
 import { GetStaticProps } from 'next'
 import { NextPage } from 'next'
-import { Card, Grid, Row, Text } from '@nextui-org/react';
+import { Grid} from '@nextui-org/react';
 
 
 import { Layout } from '../components/layouts/';
 import { pokeApi } from '../api';
 import { PokemonListResponse, SmallPokemon } from '../interfaces';
 import { PokemonCard } from '../components/pokemons';
+import { localFavorites } from '../utils';
 
 interface Props { 
   pokemons: SmallPokemon[];
@@ -16,7 +17,12 @@ interface Props {
 const HomePage: NextPage<Props> = ({pokemons}) => {
 
   //console.log(pokemons);
+  // let pkFav:number[] = [];
+  // useEffect(() => {
 
+  //   pkFav =  localFavorites.pokemons();
+
+  // }, [])
   
   return (
     <Layout title='Listado de pokemones'>
@@ -25,7 +31,7 @@ const HomePage: NextPage<Props> = ({pokemons}) => {
         { 
           pokemons.map((pokemon) =>(
 
-            <PokemonCard key = {pokemon.id} pokemon = {pokemon} />
+            <PokemonCard key = {pokemon.id} pokemon = {pokemon} isFavorite = {localFavorites.existInFavorites(pokemon.id)}/>
 
             // <Grid xs={6} sm={3} md={2} xl={1} key={id}>
             //  <Card hoverable clickable>
@@ -59,6 +65,8 @@ const HomePage: NextPage<Props> = ({pokemons}) => {
 export const getStaticProps: GetStaticProps = async (ctx) => {
 
   const {data} = await pokeApi.get<PokemonListResponse>('/pokemon?limit=151');
+
+  //console.log(data.results);
   
   const pokemons: SmallPokemon[] = data.results.map((poke)=>({
    
