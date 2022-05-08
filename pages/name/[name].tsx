@@ -119,17 +119,28 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
     paths: pokemon151.map((name) => ({
       params: { name },
     })),
-    fallback: false, //hace que si no existe la rura retorne 404
+    fallback: 'blocking', //hace que si no existe la rura retorne 404
   };
 };
 //recibe los argumentos de las rutas generadas
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { name } = params as { name: string };
 
+  const pokemon = await getPokemonInfo( name.toLowerCase() );
+
+  if ( !pokemon){
+    return {
+      redirect:{
+        destination:'/',
+        permanent: false //le dice a los robots que la redirección es permanente o no
+      }
+    }
+  }
+
 
   return {
     props: {
-      pokemon: await getPokemonInfo( name )
+      pokemon
     },
   };
 };

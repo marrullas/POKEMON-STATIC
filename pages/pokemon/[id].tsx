@@ -7,7 +7,7 @@ import confetti from 'canvas-confetti';
 
 import { pokeApi } from "../../api";
 import { Layout } from "../../components/layouts";
-import { Pokemon } from "../../interfaces";
+import { Pokemon, PokemonListResponse } from "../../interfaces";
 import { getPokemonInfo, localFavorites } from "../../utils";
 
 interface Props {
@@ -112,6 +112,10 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
 
   const pokemon151 = [...Array(151)].map((value, index) => `${index + 1}`); //generar arrar con 151 strings
 
+  //const {data} = await pokeApi.get<PokemonListResponse>('/pokemon?limit=151');
+
+  //const pokemon151: number[] = data.results.map(pokemon => pokemon.id);
+
   return {
     paths: pokemon151.map((id) => ({
       params: { id },
@@ -134,17 +138,29 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
     // }
     //],
     //fallback: "blocking" //hace que siempre responsa algo
-    fallback: false, //hace que si no existe la rura retorne 404
+    fallback: 'blocking', //hace que si no existe la rura retorne 404
   };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { id } = params as { id: string };
 
+  const pokemon = await getPokemonInfo( id );
+
+  if ( !pokemon){
+    return {
+      redirect:{
+        destination:'/',
+        permanent: false //le dice a los robots que la redirección es permanente o no
+      }
+    }
+  }
+
   return {
     props: {
-      pokemon: await getPokemonInfo( id )
+      pokemon
     },
+    revalidate: 86400 //cada 24 horas
   };
 };
 
